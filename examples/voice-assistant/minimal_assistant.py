@@ -12,7 +12,7 @@ from livekit.agents import (
     llm,
 )
 from livekit.agents.voice_assistant import VoiceAssistant
-from livekit.plugins import deepgram, openai, silero
+from livekit.plugins import deepgram, qwen, silero, openai
 
 load_dotenv()
 logger = logging.getLogger("voice-assistant")
@@ -45,9 +45,21 @@ async def entrypoint(ctx: JobContext):
 
     assistant = VoiceAssistant(
         vad=ctx.proc.userdata["vad"],
-        stt=deepgram.STT(model=dg_model),
-        llm=openai.LLM(),
-        tts=openai.TTS(),
+         ## openai
+        stt=openai.STT(base_url="https://api.chatanywhere.tech/v1",language="zh",model="whisper-1"),
+        ## qwen2
+        ## stt=openai.STT(base_url="http://10.218.127.99:3000/", language="zn"),
+        ## openai
+        llm=openai.LLM(base_url="https://api.chatanywhere.tech/v1"),
+        ## qwen2
+        ## llm=openai.LLM(base_url="http://10.218.127.29:11434/v1/", model="qwen2:72b"),
+
+        tts=qwen.TTS(
+            seed=42,
+            style_type="中文女",
+            base_url="http://10.218.127.100:3000/instruct/synthesize",
+            prompt="A girl speaker with a brisk pitch, an enthusiastic speaking pace, and a upbeat emotional demeanor.",
+        ),
         chat_ctx=initial_ctx,
     )
 
@@ -68,7 +80,7 @@ async def entrypoint(ctx: JobContext):
         if msg.message:
             asyncio.create_task(answer_from_text(msg.message))
 
-    await assistant.say("Hey, how can I help you today?", allow_interruptions=True)
+    await assistant.say("你好", allow_interruptions=True)
 
 
 if __name__ == "__main__":
