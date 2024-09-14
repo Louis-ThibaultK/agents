@@ -15,13 +15,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Union
 import requests 
 from livekit import rtc
 from livekit.agents import tts, utils
 from .log import logger
 
-from pydub import AudioSegment
 from scipy import signal
 from scipy.io import wavfile
 from io import BytesIO
